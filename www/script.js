@@ -58,7 +58,11 @@ document.addEventListener('DOMContentLoaded', () => {
     return 0;
   };
 
+  const signInButton = loginForm.querySelector('.unlock-btn');
+
   const checkForAppUpdate = async () => {
+    signInButton.disabled = true;
+    signInButton.textContent = 'Checking for updates…';
     try {
       const response = await fetch(releasesApi, {
         headers: { Accept: 'application/vnd.github+json' },
@@ -74,6 +78,9 @@ document.addEventListener('DOMContentLoaded', () => {
       updateDialog.classList.remove('hidden');
     } catch {
       // Updates are optional; a network failure must not block the app.
+    } finally {
+      signInButton.disabled = false;
+      signInButton.textContent = 'Sign in →';
     }
   };
 
@@ -246,7 +253,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
   loginForm.addEventListener('submit', (event) => {
     event.preventDefault();
-    if (isTransitioning) return;
+    if (isTransitioning || signInButton.disabled) return;
     const emailValue = email.value.trim();
     if (!emailValue || !email.validity.valid) {
       showError('Enter a valid work email address.', email);
