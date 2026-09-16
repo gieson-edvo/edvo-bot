@@ -142,6 +142,13 @@ input {
   gap: 12px;
 }
 
+.app-version {
+  margin: 14px 0 0;
+  color: var(--muted);
+  font-size: 0.82rem;
+  letter-spacing: 0.02em;
+}
+
 .login-form .access-box {
   width: 100%;
   min-height: 62px;
