@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>EDVO BOT</title>
+    <meta name="theme-color" content="#050b11" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <div class="app-screen" id="lockScreen">
+      <div class="lock-panel">
+        <div class="hero-art" aria-label="EDVO robot artwork">
+          <img src="assets/new-edvo-logo.png" alt="EDVO bot logo" class="brand-logo" />
+        </div>
+
+        <h1>EDVO BOT — Employees Only</h1>
+        <p>
+          Sign in with your EDVO.X/EDVOCOMM employee account to continue.
+        </p>
+
+        <form class="login-form" id="loginForm" novalidate>
+          <label class="access-box" for="email">
+            <span class="field-icon" aria-hidden="true">@</span>
+            <input type="email" id="email" placeholder="Work email" autocomplete="email" aria-label="Work email" required />
+          </label>
+          <label class="access-box" for="password">
+            <span class="field-icon" aria-hidden="true">&#128274;</span>
+            <input type="password" id="password" placeholder="Password" autocomplete="current-password" aria-label="Password" required minlength="6" />
+            <button class="password-toggle" type="button" id="passwordToggle" aria-label="Show password">
+              <svg class="password-eye password-eye-show" viewBox="0 0 24 24" aria-hidden="true"><path d="M2.5 12S6 5.5 12 5.5 21.5 12 21.5 12 18 18.5 12 18.5 2.5 12 2.5 12Z"/><circle cx="12" cy="12" r="2.8"/></svg>
+              <svg class="password-eye password-eye-hide" viewBox="0 0 24 24" aria-hidden="true"><path d="M3 3 21 21M2.5 12S6 5.5 12 5.5c1.1 0 2.1.2 3.1.7M21.5 12s-1.3 2.3-3.6 4.1C16.3 17.6 14.3 18.5 12 18.5 6 18.5 2.5 12 2.5 12Z"/><path d="M9.8 9.8a3.1 3.1 0 0 0 4.4 4.4"/></svg>
+            </button>
+          </label>
+          <p class="login-error hidden" id="loginError" role="alert"></p>
+          <button class="unlock-btn" type="submit">Sign in &rarr;</button>
+        </form>
+
+        <div class="legacy-access">
+          <span class="code-icon">◫</span>
+          <input type="text" id="accessCode" placeholder="Access code" aria-label="Access code" />
+          <button class="info-btn" aria-label="Show info">◉</button>
+        </div>
+
+        <button class="unlock-btn" id="unlockBtn">Unlock →</button>
+      </div>
+    </div>
+
+    <div class="chat-screen hidden" id="chatScreen">
+      <header class="chat-header">
+        <div class="brand-inline">
+          <div class="mini-avatar"></div>
+          <div class="brand-copy">
+            <span class="brand-title">EDVO BOT</span>
+            <span class="brand-subtitle">PEOPLE • IDEAS • OPERATIONS • TOMORROW</span>
+          </div>
+        </div>
+        <div class="header-actions">
+          <button class="sidebar-toggle hidden" id="sidebarToggle" type="button" aria-label="Open admin menu" aria-expanded="false">☰</button>
+          <button class="speaker-btn" aria-label="Audio">◌</button>
+        </div>
+      </header>
+
+      <div class="workspace">
+        <aside class="admin-sidebar hidden" id="adminSidebar" aria-label="Admin navigation">
+          <nav class="sidebar-nav">
+            <button class="sidebar-link active" type="button" data-view="chatView">Chat</button>
+            <button class="sidebar-link" type="button" data-view="employeesView">Create employee</button>
+            <button class="sidebar-link" type="button" data-view="uploadsView">Upload files</button>
+          </nav>
+          <button class="sidebar-logout" id="logoutButton" type="button">Log out</button>
+        </aside>
+
+        <main class="workspace-content">
+        <section class="admin-view hidden" id="employeesView" aria-label="Employee accounts">
+          <div class="view-heading"><h2>Create employee</h2><p>Create employee access for the EDVO Bot app.</p></div>
+          <form class="employee-form" id="employeeForm" novalidate>
+            <input id="employeeName" type="text" placeholder="Employee name" required />
+            <input id="employeeEmail" type="email" placeholder="Work email" required />
+            <input id="employeePassword" type="password" placeholder="Temporary password" required minlength="6" />
+            <button type="submit">Add employee</button>
+          </form>
+          <p class="admin-error hidden" id="adminError" role="alert"></p>
+          <div class="employee-list" id="employeeList"></div>
+        </section>
+
+        <section class="admin-view hidden" id="uploadsView" aria-label="Upload company documents">
+          <div class="view-heading"><h2>Upload files</h2><p>Add approved company documents for the EDVO Bot knowledge base.</p></div>
+          <form class="upload-form" id="uploadForm">
+            <label class="drop-zone" for="documentFile"><strong>Select a PDF</strong><span>Mission, vision, policies, rules, or employee handbook</span><input id="documentFile" type="file" accept="application/pdf,.pdf" required /></label>
+            <button type="submit">Upload document</button>
+          </form>
+          <p class="upload-status hidden" id="uploadStatus" role="status"></p>
+          <div class="document-list" id="documentList"></div>
+        </section>
+
+        <section class="admin-view chat-view" id="chatView">
+        <main class="chat-body" id="chatMessages" aria-live="polite">
+        <div class="message-row assistant-row">
+          <div class="bot-avatar-small"></div>
+          <div class="bubble assistant-bubble">
+            Hi, I'm EDVO.BOT.<br />
+            Welcome to EDVO.X. I'm here to help you learn more about our company, our services,
+            our team, and everything you want to know about us.
+          </div>
+        </div>
+
+        <div class="message-row user-row">
+          <div class="bubble user-bubble">Tell me about EDVO.X — your story, mission, and vision.</div>
+        </div>
+
+        <div class="message-row assistant-row">
+          <div class="bot-avatar-small"></div>
+          <div class="bubble assistant-bubble">Something went wrong reaching the assistant. Please try again.</div>
+        </div>
+
+        <div class="message-row user-row">
+          <div class="bubble user-bubble">HI</div>
+        </div>
+
+        <div class="message-row assistant-row">
+          <div class="bot-avatar-small"></div>
+          <div class="bubble assistant-bubble">Something went wrong reaching the assistant. Please try again.</div>
+        </div>
+        </main>
+
+        <footer class="chat-input-bar">
+        <form class="chat-input-wrap" id="chatForm">
+          <input id="chatInput" type="text" placeholder="Ask a question..." aria-label="Ask a question" autocomplete="off" />
+          <button class="mic-btn" type="button" aria-label="Voice input">◍</button>
+          <button class="send-btn" type="submit" aria-label="Send">→</button>
+        </form>
+        </footer>
+        </section>
+        </main>
+      </div>
+    </div>
+
+    <div class="loading-overlay hidden" id="loadingOverlay" role="status" aria-live="polite">
+      <div class="loading-card"><span class="loading-spinner"></span><span id="loadingText">Loading…</span></div>
+    </div>
+
+    <section class="update-dialog hidden" id="updateDialog" role="dialog" aria-modal="true" aria-labelledby="updateTitle">
+      <div class="update-card">
+        <span class="update-kicker">EDVO BOT UPDATE</span>
+        <h2 id="updateTitle">A new version is ready</h2>
+        <p id="updateMessage">Install the latest version to get the newest improvements.</p>
+        <div class="update-actions">
+          <button class="update-later" id="updateLater" type="button">Later</button>
+          <a class="update-now" id="updateNow" href="#" target="_blank" rel="noopener">Update now</a>
+        </div>
+      </div>
+    </section>
+    <script src="version.js"></script>
+    <script src="script.js"></script>
+  </body>
+</html>

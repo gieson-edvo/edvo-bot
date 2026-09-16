@@ -1,0 +1,49 @@
+<svg width="360" height="360" viewBox="0 0 360 360" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="metal" x1="60" y1="40" x2="300" y2="320" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#F4F7F7"/>
+      <stop offset="0.33" stop-color="#D7E4E8"/>
+      <stop offset="0.7" stop-color="#969EA7"/>
+      <stop offset="1" stop-color="#F3F7F8"/>
+    </linearGradient>
+    <linearGradient id="metalDark" x1="80" y1="70" x2="300" y2="290" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#1A222A"/>
+      <stop offset="0.5" stop-color="#090E13"/>
+      <stop offset="1" stop-color="#222E39"/>
+    </linearGradient>
+    <filter id="shadow" x="-20%" y="-20%" width="140%" height="140%">
+      <feDropShadow dx="0" dy="10" stdDeviation="15" flood-color="#1EE7A4" flood-opacity="0.18"/>
+    </filter>
+  </defs>
+
+  <g filter="url(#shadow)">
+    <path d="M125 110C125 89.0132 142.013 72 163 72H197C217.987 72 235 89.0132 235 110V130H125V110Z" fill="url(#metalDark)"/>
+    <circle cx="180" cy="188" r="96" fill="url(#metal)" stroke="#1A2128" stroke-width="10"/>
+    <circle cx="180" cy="188" r="76" fill="#0B131B" stroke="#A7B5BA" stroke-width="7"/>
+    <circle cx="180" cy="188" r="62" fill="#111C24" stroke="#111C24" stroke-width="4"/>
+
+    <path d="M130 198C130 155.026 165.026 120 208 120H212C254.974 120 290 155.026 290 198V238C290 280.974 254.974 316 212 316H208C165.026 316 130 280.974 130 238V198Z" fill="url(#metalDark)"/>
+    <path d="M70 198C70 155.026 105.026 120 148 120H152C194.974 120 230 155.026 230 198V238C230 280.974 194.974 316 152 316H148C105.026 316 70 280.974 70 238V198Z" fill="url(#metal)"/>
+
+    <path d="M102 213C102 170.026 137.026 135 180 135C222.974 135 258 170.026 258 213V238C258 280.974 222.974 316 180 316C137.026 316 102 280.974 102 238V213Z" fill="#111C24" stroke="#DDEAF1" stroke-width="4"/>
+    <path d="M138 189C138 169.118 154.118 153 174 153H186C205.882 153 222 169.118 222 189V219C222 238.882 205.882 255 186 255H174C154.118 255 138 238.882 138 219V189Z" fill="#0E181D"/>
+
+    <path d="M120 70L144 104L174 82L160 58L120 70Z" fill="url(#metal)"/>
+    <path d="M240 70L216 104L186 82L200 58L240 70Z" fill="url(#metal)"/>
+
+    <circle cx="150" cy="200" r="17" fill="#EBF7F5"/>
+    <circle cx="210" cy="200" r="17" fill="#EBF7F5"/>
+    <circle cx="150" cy="200" r="8" fill="#59E1B5"/>
+    <circle cx="210" cy="200" r="8" fill="#59E1B5"/>
+
+    <path d="M162 235C169.2 242.8 190.8 242.8 198 235" stroke="#59E1B5" stroke-width="6" stroke-linecap="round"/>
+    <path d="M138 150C150 160 158 170 166 177" stroke="#8CC7D2" stroke-width="6" stroke-linecap="round"/>
+    <path d="M222 150C210 160 202 170 194 177" stroke="#8CC7D2" stroke-width="6" stroke-linecap="round"/>
+
+    <path d="M147 268H213" stroke="#5CE2B2" stroke-width="12" stroke-linecap="round"/>
+    <path d="M124 292L94 332" stroke="#0D1318" stroke-width="18" stroke-linecap="round"/>
+    <path d="M236 292L266 332" stroke="#0D1318" stroke-width="18" stroke-linecap="round"/>
+    <path d="M95 142L70 118" stroke="#0D1318" stroke-width="12" stroke-linecap="round"/>
+    <path d="M265 142L290 118" stroke="#0D1318" stroke-width="12" stroke-linecap="round"/>
+  </g>
+</svg>

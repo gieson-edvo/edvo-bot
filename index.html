@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>EDVO BOT</title>
+    <meta name="theme-color" content="#050b11" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <div class="app-screen" id="lockScreen">
+      <div class="lock-panel">
+        <div class="hero-art" aria-label="EDVO robot artwork">
+          <img src="assets/edvo-bot-logo-transparent.png" alt="EDVO bot logo" class="brand-logo" />
+        </div>
+
+        <h1>EDVO BOT — Employees Only</h1>
+        <p>
+          Sign in with your EDVO.X/EDVOCOMM employee account to continue.
+        </p>
+
+        <form class="login-form" id="loginForm" novalidate>
+          <label class="access-box" for="email">
+            <span class="field-icon" aria-hidden="true">@</span>
+            <input type="email" id="email" placeholder="Work email" autocomplete="email" aria-label="Work email" required />
+          </label>
+          <label class="access-box" for="password">
+            <span class="field-icon" aria-hidden="true">&#128274;</span>
+            <input type="password" id="password" placeholder="Password" autocomplete="current-password" aria-label="Password" required minlength="6" />
+            <button class="password-toggle" type="button" id="passwordToggle" aria-label="Show password">Show</button>
+          </label>
+          <p class="login-error hidden" id="loginError" role="alert"></p>
+          <button class="unlock-btn" type="submit">Sign in &rarr;</button>
+        </form>
+
+        <div class="legacy-access">
+          <span class="code-icon">◫</span>
+          <input type="text" id="accessCode" placeholder="Access code" aria-label="Access code" />
+          <button class="info-btn" aria-label="Show info">◉</button>
+        </div>
+
+        <button class="unlock-btn" id="unlockBtn">Unlock →</button>
+      </div>
+    </div>
+
+    <div class="chat-screen hidden" id="chatScreen">
+      <header class="chat-header">
+        <div class="brand-inline">
+          <div class="mini-avatar"></div>
+          <div class="brand-copy">
+            <span class="brand-title">EDVO BOT</span>
+            <span class="brand-subtitle">PEOPLE • IDEAS • OPERATIONS • TOMORROW</span>
+          </div>
+        </div>
+        <button class="speaker-btn" aria-label="Audio">◌</button>
+      </header>
+
+      <main class="chat-body">
+        <div class="message-row assistant-row">
+          <div class="bot-avatar-small"></div>
+          <div class="bubble assistant-bubble">
+            Hi, I'm EDVO.BOT.<br />
+            Welcome to EDVO.X. I'm here to help you learn more about our company, our services,
+            our team, and everything you want to know about us.
+          </div>
+        </div>
+
+        <div class="message-row user-row">
+          <div class="bubble user-bubble">Tell me about EDVO.X — your story, mission, and vision.</div>
+        </div>
+
+        <div class="message-row assistant-row">
+          <div class="bot-avatar-small"></div>
+          <div class="bubble assistant-bubble">Something went wrong reaching the assistant. Please try again.</div>
+        </div>
+
+        <div class="message-row user-row">
+          <div class="bubble user-bubble">HI</div>
+        </div>
+
+        <div class="message-row assistant-row">
+          <div class="bot-avatar-small"></div>
+          <div class="bubble assistant-bubble">Something went wrong reaching the assistant. Please try again.</div>
+        </div>
+      </main>
+
+      <footer class="chat-input-bar">
+        <div class="chat-input-wrap">
+          <input type="text" placeholder="Ask a question..." aria-label="Ask a question" />
+          <button class="mic-btn" aria-label="Voice input">◍</button>
+          <button class="send-btn" aria-label="Send">→</button>
+        </div>
+        <div class="footer-tag">A brighter tomorrow — together.</div>
+      </footer>
+    </div>
+
+    <script src="script.js"></script>
+  </body>
+</html>

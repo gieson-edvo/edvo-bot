@@ -1,0 +1,15 @@
+node_modules/
+.gradle/
+android/.gradle/
+android/.gradle-user/
+android/build/
+android/app/build/
+android/app/src/main/assets/public/
+*.apk
+*.aab
+*.jks
+*.keystore
+local.properties
+emulator-*.png
+edvo-expo/
+nul
