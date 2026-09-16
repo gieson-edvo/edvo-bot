@@ -205,14 +205,28 @@ document.addEventListener('DOMContentLoaded', () => {
     return firstName.charAt(0).toUpperCase() + firstName.slice(1);
   };
 
+  const findKnowledgeAnswer = (question) => {
+    const knowledge = window.EDVO_KNOWLEDGE || [];
+    let best = null;
+    let bestScore = 0;
+    knowledge.forEach((entry) => {
+      const score = entry.keywords.reduce((total, keyword) => (question.includes(keyword) ? total + keyword.length : total), 0);
+      if (score > bestScore) {
+        bestScore = score;
+        best = entry;
+      }
+    });
+    return best ? best.answer : null;
+  };
+
   const getFakeReply = (message) => {
     const question = message.toLowerCase();
     if (/\b(hi|hello|hey)\b/.test(question)) return `Hi ${currentUserName}! How can I help you with EDVO.X today?`;
-    if (/mission|vision|story|about edvo/.test(question)) return 'EDVO.X connects people, ideas, and operations to help teams build a brighter tomorrow. This is a demo knowledge-base response.';
-    if (/service|product|offer/.test(question)) return 'EDVO.X supports teams with connected operations, shared knowledge, and practical tools for everyday work.';
     if (/employee|account|password|login/.test(question)) return 'For employee access, an administrator can create an account from the Create employee section in the sidebar.';
     if (/upload|file|document|pdf/.test(question)) return 'Approved PDF documents can be added from Upload files. In this demo, uploaded file details are saved locally on the device.';
-    return `Thanks, ${currentUserName}. I received your message. This demo chat replies using local sample data—try asking about EDVO.X, services, employee accounts, or uploads.`;
+    const knowledgeAnswer = findKnowledgeAnswer(question);
+    if (knowledgeAnswer) return knowledgeAnswer;
+    return `Thanks, ${currentUserName}. I received your message. Try asking about EDVO.X's mission, services, pricing, careers, or how to get in touch.`;
   };
 
   const startChat = (account, emailValue) => {
