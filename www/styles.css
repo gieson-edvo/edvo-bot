@@ -89,7 +89,8 @@ input {
 }
 
 .lock-panel h1 {
-  margin: 0;
+  margin: 0 0 28px;
+  color: var(--green);
   font-size: clamp(2rem, 4vw, 2.8rem);
   line-height: 1.2;
   font-weight: 800;
