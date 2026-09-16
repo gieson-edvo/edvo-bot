@@ -10,7 +10,9 @@ document.addEventListener('DOMContentLoaded', () => {
   const sidebarToggle = document.getElementById('sidebarToggle');
   const logoutButton = document.getElementById('logoutButton');
   const adminViews = document.querySelectorAll('.admin-view');
-  const sidebarLinks = document.querySelectorAll('.sidebar-link');
+  const sidebarLinks = document.querySelectorAll('.sidebar-link[data-view]');
+  const employeeMenuToggle = document.getElementById('employeeMenuToggle');
+  const employeeSubmenu = document.getElementById('employeeSubmenu');
   const employeeForm = document.getElementById('employeeForm');
   const employeeName = document.getElementById('employeeName');
   const employeeEmail = document.getElementById('employeeEmail');
@@ -35,16 +37,10 @@ document.addEventListener('DOMContentLoaded', () => {
   const appVersionLabel = document.getElementById('appVersion');
   appVersionLabel.textContent = `Version ${appVersion}`;
   const releasesApi = 'https://api.github.com/repos/gieson-edvo/edvo-bot/releases/latest';
-  const adminKey = 'edvoAdminAccounts';
-  const employeeKey = 'edvoEmployeeAccounts';
+  const apiBase = 'https://bot.edvo-x.com/api';
   const documentKey = 'edvoKnowledgeDocuments';
 
-  const defaultAdmin = { name: 'EDVO Administrator', email: 'admin@edvo.x', password: 'Admin123!' };
-  const defaultEmployee = { name: 'EDVO Employee', email: 'employee@edvo.x', password: 'Employee123!' };
-  const getAdmins = () => JSON.parse(localStorage.getItem(adminKey) || '[]');
-  const saveAdmins = (admins) => localStorage.setItem(adminKey, JSON.stringify(admins));
-  const getEmployees = () => JSON.parse(localStorage.getItem(employeeKey) || '[]');
-  const saveEmployees = (employees) => localStorage.setItem(employeeKey, JSON.stringify(employees));
+  let currentSession = null;
   const getDocuments = () => JSON.parse(localStorage.getItem(documentKey) || '[]');
   const saveDocuments = (documents) => localStorage.setItem(documentKey, JSON.stringify(documents));
 
@@ -86,28 +82,24 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   };
 
-  const seedDefaultAccounts = () => {
-    const admins = getAdmins();
-    if (!admins.some((account) => account.email === defaultAdmin.email)) {
-      saveAdmins([...admins, defaultAdmin]);
-    }
-
-    const employees = getEmployees();
-    if (!employees.some((account) => account.email === defaultEmployee.email)) {
-      saveEmployees([...employees, defaultEmployee]);
-    }
-  };
-
-  seedDefaultAccounts();
   checkForAppUpdate();
 
   updateLater.addEventListener('click', () => updateDialog.classList.add('hidden'));
 
-  const renderEmployees = () => {
-    const employees = getEmployees();
-    employeeList.innerHTML = employees.length
-      ? employees.map((employee) => `<div class="employee-row"><span>${employee.name}</span><small>${employee.email}</small></div>`).join('')
-      : '<p class="empty-employees">No employee accounts added yet.</p>';
+  const renderEmployees = async () => {
+    employeeList.innerHTML = '<p class="empty-employees">Loading…</p>';
+    try {
+      const response = await fetch(`${apiBase}/employees`, {
+        headers: { Authorization: `Bearer ${currentSession.token}` },
+      });
+      if (!response.ok) throw new Error('Failed to load employees');
+      const employees = await response.json();
+      employeeList.innerHTML = employees.length
+        ? employees.map((employee) => `<div class="employee-row"><span>${employee.name}</span><small>${employee.email}</small></div>`).join('')
+        : '<p class="empty-employees">No employee accounts added yet.</p>';
+    } catch {
+      employeeList.innerHTML = '<p class="empty-employees">Could not load employees. Check your connection and try again.</p>';
+    }
   };
 
   const renderDocuments = () => {
@@ -117,12 +109,25 @@ document.addEventListener('DOMContentLoaded', () => {
       : '<p class="empty-employees">No documents uploaded yet.</p>';
   };
 
+  const employeeViewIds = ['employeesView', 'employeeListView'];
+
   const showAdminView = (viewId) => {
     adminViews.forEach((view) => view.classList.toggle('hidden', view.id !== viewId));
     sidebarLinks.forEach((link) => link.classList.toggle('active', link.dataset.view === viewId));
+    employeeMenuToggle.classList.toggle('active', employeeViewIds.includes(viewId));
+    if (employeeViewIds.includes(viewId)) {
+      employeeSubmenu.classList.remove('hidden');
+      employeeMenuToggle.setAttribute('aria-expanded', 'true');
+    }
     adminSidebar.classList.remove('is-open');
     sidebarToggle.setAttribute('aria-expanded', 'false');
   };
+
+  employeeMenuToggle.addEventListener('click', () => {
+    const isOpen = employeeSubmenu.classList.toggle('hidden') === false;
+    employeeMenuToggle.setAttribute('aria-expanded', String(isOpen));
+    if (isOpen) showAdminView('employeesView');
+  });
 
   let currentUserName = 'there';
   const scrollChatToLatest = () => {
@@ -199,8 +204,8 @@ document.addEventListener('DOMContentLoaded', () => {
     }, 14);
   };
 
-  const getDisplayName = (account, emailValue) => {
-    if (account.name && !/^EDVO (Administrator|Employee)$/i.test(account.name)) return account.name.split(' ')[0];
+  const getDisplayName = (name, emailValue) => {
+    if (name && !/^EDVO (Administrator|Employee)$/i.test(name)) return name.split(' ')[0];
     const firstName = emailValue.split('@')[0].split(/[._-]/)[0];
     return firstName.charAt(0).toUpperCase() + firstName.slice(1);
   };
@@ -229,18 +234,18 @@ document.addEventListener('DOMContentLoaded', () => {
     return `Thanks, ${currentUserName}. I received your message. Try asking about EDVO.X's mission, services, pricing, careers, or how to get in touch.`;
   };
 
-  const startChat = (account, emailValue) => {
-    currentUserName = getDisplayName(account, emailValue);
+  const startChat = (name, emailValue) => {
+    currentUserName = getDisplayName(name, emailValue);
     chatMessages.replaceChildren();
     appendChatMessage('assistant', `Hi ${currentUserName}, what can I do for you today?`);
     chatInput.value = '';
   };
 
-  const openChat = (role, account, emailValue) => {
+  const openChat = (session) => {
     lockScreen.classList.add('hidden');
     chatScreen.classList.remove('hidden');
-    startChat(account, emailValue);
-    if (role === 'admin') {
+    startChat(session.name, session.email);
+    if (session.role === 'admin') {
       renderEmployees();
       renderDocuments();
       adminSidebar.classList.remove('hidden');
@@ -267,7 +272,7 @@ document.addEventListener('DOMContentLoaded', () => {
     isTransitioning = false;
   };
 
-  loginForm.addEventListener('submit', (event) => {
+  loginForm.addEventListener('submit', async (event) => {
     event.preventDefault();
     if (isTransitioning || signInButton.disabled) return;
     const emailValue = email.value.trim();
@@ -279,24 +284,29 @@ document.addEventListener('DOMContentLoaded', () => {
       showError('Enter a password with at least 6 characters.', password);
       return;
     }
-    const normalizedEmail = emailValue.toLowerCase();
-    const accountGroups = [
-      { role: 'admin', accounts: getAdmins() },
-      { role: 'employee', accounts: getEmployees() },
-    ];
-    const match = accountGroups
-      .map(({ role, accounts }) => ({ role, account: accounts.find((item) => item.email === normalizedEmail && item.password === password.value) }))
-      .find(({ account }) => account);
-    if (!match) {
-      showError('Account not found or password is incorrect.', password);
-      return;
-    }
     loginError.classList.add('hidden');
     showLoading('Signing you in…');
-    window.setTimeout(() => {
-      openChat(match.role, match.account, emailValue);
+    try {
+      const response = await fetch(`${apiBase}/auth/login`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email: emailValue.toLowerCase(), password: password.value }),
+      });
+      const data = await response.json().catch(() => ({}));
+      if (!response.ok) {
+        hideLoading();
+        showError(data.error || 'Account not found or password is incorrect.', password);
+        return;
+      }
+      currentSession = data;
+      window.setTimeout(() => {
+        openChat(currentSession);
+        hideLoading();
+      }, 650);
+    } catch {
       hideLoading();
-    }, 650);
+      showError('Could not reach the server. Check your connection and try again.', password);
+    }
   });
 
   passwordToggle.addEventListener('click', () => {
@@ -325,18 +335,23 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   });
 
-  sidebarLinks.forEach((link) => link.addEventListener('click', () => showAdminView(link.dataset.view)));
+  sidebarLinks.forEach((link) => link.addEventListener('click', () => {
+    showAdminView(link.dataset.view);
+    if (link.dataset.view === 'employeeListView') renderEmployees();
+  }));
 
   logoutButton.addEventListener('click', () => {
     if (isTransitioning) return;
     showLoading('Signing you out…');
     window.setTimeout(() => {
+      currentSession = null;
       chatScreen.classList.add('hidden');
       lockScreen.classList.remove('hidden');
       adminSidebar.classList.add('hidden');
       adminSidebar.classList.remove('is-open');
       sidebarToggle.classList.add('hidden');
       sidebarToggle.setAttribute('aria-expanded', 'false');
+      showAdminView('chatView');
       loginForm.reset();
       password.type = 'password';
       passwordToggle.classList.remove('is-visible');
@@ -364,7 +379,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }, 600);
   });
 
-  employeeForm.addEventListener('submit', (event) => {
+  employeeForm.addEventListener('submit', async (event) => {
     event.preventDefault();
     const name = employeeName.value.trim();
     const workEmail = employeeEmail.value.trim().toLowerCase();
@@ -373,17 +388,25 @@ document.addEventListener('DOMContentLoaded', () => {
       adminError.classList.remove('hidden');
       return;
     }
-    const employees = getEmployees();
-    if (employees.some((employee) => employee.email === workEmail)) {
-      adminError.textContent = 'That employee email already exists.';
+    try {
+      const response = await fetch(`${apiBase}/employees`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${currentSession.token}` },
+        body: JSON.stringify({ name, email: workEmail, password: employeePassword.value }),
+      });
+      const data = await response.json().catch(() => ({}));
+      if (!response.ok) {
+        adminError.textContent = data.error || 'Could not create the employee account.';
+        adminError.classList.remove('hidden');
+        return;
+      }
+      employeeForm.reset();
+      adminError.classList.add('hidden');
+      renderEmployees();
+    } catch {
+      adminError.textContent = 'Could not reach the server. Check your connection and try again.';
       adminError.classList.remove('hidden');
-      return;
     }
-    employees.push({ name, email: workEmail, password: employeePassword.value });
-    saveEmployees(employees);
-    employeeForm.reset();
-    adminError.classList.add('hidden');
-    renderEmployees();
   });
 
   uploadForm.addEventListener('submit', (event) => {
