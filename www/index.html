@@ -67,33 +67,12 @@
         <aside class="admin-sidebar hidden" id="adminSidebar" aria-label="Admin navigation">
           <nav class="sidebar-nav">
             <button class="sidebar-link active" type="button" data-view="chatView">Chat</button>
-            <button class="sidebar-link sidebar-parent" type="button" id="employeeMenuToggle" aria-expanded="false" aria-controls="employeeSubmenu">Employee</button>
-            <div class="sidebar-submenu hidden" id="employeeSubmenu">
-              <button class="sidebar-link sidebar-sublink" type="button" data-view="employeesView">Create employee</button>
-              <button class="sidebar-link sidebar-sublink" type="button" data-view="employeeListView">Employee list</button>
-            </div>
-            <button class="sidebar-link" type="button" data-view="uploadsView">Upload files</button>
+            <button class="sidebar-link" type="button" id="uploadsLink" data-view="uploadsView">Upload files</button>
           </nav>
           <button class="sidebar-logout" id="logoutButton" type="button">Log out</button>
         </aside>
 
         <main class="workspace-content">
-        <section class="admin-view hidden" id="employeesView" aria-label="Create employee">
-          <div class="view-heading"><h2>Create employee</h2><p>Create employee access for the EDVO Bot app.</p></div>
-          <form class="employee-form" id="employeeForm" novalidate>
-            <input id="employeeName" type="text" placeholder="Employee name" required />
-            <input id="employeeEmail" type="email" placeholder="Work email" required />
-            <input id="employeePassword" type="password" placeholder="Temporary password" required minlength="6" />
-            <button type="submit">Add employee</button>
-          </form>
-          <p class="admin-error hidden" id="adminError" role="alert"></p>
-        </section>
-
-        <section class="admin-view hidden" id="employeeListView" aria-label="Employee list">
-          <div class="view-heading"><h2>Employee list</h2><p>Employees who can sign in to the EDVO Bot app.</p></div>
-          <div class="employee-list" id="employeeList"></div>
-        </section>
-
         <section class="admin-view hidden" id="uploadsView" aria-label="Upload company documents">
           <div class="view-heading"><h2>Upload files</h2><p>Add approved company documents for the EDVO Bot knowledge base.</p></div>
           <form class="upload-form" id="uploadForm">
@@ -162,7 +141,6 @@
       </div>
     </section>
     <script src="version.js"></script>
-    <script src="knowledge.js"></script>
     <script src="script.js"></script>
   </body>
 </html>

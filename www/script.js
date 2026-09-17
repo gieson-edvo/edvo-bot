@@ -8,17 +8,10 @@ document.addEventListener('DOMContentLoaded', () => {
   const loginError = document.getElementById('loginError');
   const adminSidebar = document.getElementById('adminSidebar');
   const sidebarToggle = document.getElementById('sidebarToggle');
+  const uploadsLink = document.getElementById('uploadsLink');
   const logoutButton = document.getElementById('logoutButton');
   const adminViews = document.querySelectorAll('.admin-view');
   const sidebarLinks = document.querySelectorAll('.sidebar-link[data-view]');
-  const employeeMenuToggle = document.getElementById('employeeMenuToggle');
-  const employeeSubmenu = document.getElementById('employeeSubmenu');
-  const employeeForm = document.getElementById('employeeForm');
-  const employeeName = document.getElementById('employeeName');
-  const employeeEmail = document.getElementById('employeeEmail');
-  const employeePassword = document.getElementById('employeePassword');
-  const employeeList = document.getElementById('employeeList');
-  const adminError = document.getElementById('adminError');
   const uploadForm = document.getElementById('uploadForm');
   const documentFile = document.getElementById('documentFile');
   const uploadStatus = document.getElementById('uploadStatus');
@@ -38,11 +31,8 @@ document.addEventListener('DOMContentLoaded', () => {
   appVersionLabel.textContent = `Version ${appVersion}`;
   const releasesApi = 'https://api.github.com/repos/gieson-edvo/edvo-bot/releases/latest';
   const apiBase = 'https://bot.edvo-x.com/api';
-  const documentKey = 'edvoKnowledgeDocuments';
 
   let currentSession = null;
-  const getDocuments = () => JSON.parse(localStorage.getItem(documentKey) || '[]');
-  const saveDocuments = (documents) => localStorage.setItem(documentKey, JSON.stringify(documents));
 
   const compareVersions = (first, second) => {
     const firstParts = first.replace(/^v/i, '').split('.').map((part) => Number(part) || 0);
@@ -86,48 +76,28 @@ document.addEventListener('DOMContentLoaded', () => {
 
   updateLater.addEventListener('click', () => updateDialog.classList.add('hidden'));
 
-  const renderEmployees = async () => {
-    employeeList.innerHTML = '<p class="empty-employees">Loading…</p>';
+  const escapeHtml = (value) => String(value).replace(/[&<>"']/g, (ch) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[ch]));
+
+  const renderDocuments = async () => {
+    documentList.innerHTML = '<p class="empty-state">Loading…</p>';
     try {
-      const response = await fetch(`${apiBase}/employees`, {
+      const response = await fetch(`${apiBase}/documents`, {
         headers: { Authorization: `Bearer ${currentSession.token}` },
       });
-      if (!response.ok) throw new Error('Failed to load employees');
-      const employees = await response.json();
-      employeeList.innerHTML = employees.length
-        ? employees.map((employee) => `<div class="employee-row"><span>${employee.name}</span><small>${employee.email}</small></div>`).join('')
-        : '<p class="empty-employees">No employee accounts added yet.</p>';
+      if (!response.ok) throw new Error('Failed to load documents');
+      const documents = await response.json();
+      documentList.innerHTML = documents.length
+        ? documents.map((document) => `<div class="document-row"><span>${escapeHtml(document.name)}</span><small>${document.size_kb} KB · Added to EDVO Bot's knowledge</small></div>`).join('')
+        : '<p class="empty-state">No documents uploaded yet.</p>';
     } catch {
-      employeeList.innerHTML = '<p class="empty-employees">Could not load employees. Check your connection and try again.</p>';
+      documentList.innerHTML = '<p class="empty-state">Could not load documents. Check your connection and try again.</p>';
     }
   };
-
-  const renderDocuments = () => {
-    const documents = getDocuments();
-    documentList.innerHTML = documents.length
-      ? documents.map((document) => `<div class="document-row"><span>${document.name}</span><small>${document.size} KB · Waiting for cloud sync</small></div>`).join('')
-      : '<p class="empty-employees">No documents uploaded yet.</p>';
-  };
-
-  const employeeViewIds = ['employeesView', 'employeeListView'];
 
   const showAdminView = (viewId) => {
     adminViews.forEach((view) => view.classList.toggle('hidden', view.id !== viewId));
     sidebarLinks.forEach((link) => link.classList.toggle('active', link.dataset.view === viewId));
-    employeeMenuToggle.classList.toggle('active', employeeViewIds.includes(viewId));
-    if (employeeViewIds.includes(viewId)) {
-      employeeSubmenu.classList.remove('hidden');
-      employeeMenuToggle.setAttribute('aria-expanded', 'true');
-    }
-    adminSidebar.classList.remove('is-open');
-    sidebarToggle.setAttribute('aria-expanded', 'false');
   };
-
-  employeeMenuToggle.addEventListener('click', () => {
-    const isOpen = employeeSubmenu.classList.toggle('hidden') === false;
-    employeeMenuToggle.setAttribute('aria-expanded', String(isOpen));
-    if (isOpen) showAdminView('employeesView');
-  });
 
   let currentUserName = 'there';
   const scrollChatToLatest = () => {
@@ -210,33 +180,12 @@ document.addEventListener('DOMContentLoaded', () => {
     return firstName.charAt(0).toUpperCase() + firstName.slice(1);
   };
 
-  const findKnowledgeAnswer = (question) => {
-    const knowledge = window.EDVO_KNOWLEDGE || [];
-    let best = null;
-    let bestScore = 0;
-    knowledge.forEach((entry) => {
-      const score = entry.keywords.reduce((total, keyword) => (question.includes(keyword) ? total + keyword.length : total), 0);
-      if (score > bestScore) {
-        bestScore = score;
-        best = entry;
-      }
-    });
-    return best ? best.answer : null;
-  };
-
-  const getFakeReply = (message) => {
-    const question = message.toLowerCase();
-    if (/\b(hi|hello|hey)\b/.test(question)) return `Hi ${currentUserName}! How can I help you with EDVO.X today?`;
-    if (/employee|account|password|login/.test(question)) return 'For employee access, an administrator can create an account from the Create employee section in the sidebar.';
-    if (/upload|file|document|pdf/.test(question)) return 'Approved PDF documents can be added from Upload files. In this demo, uploaded file details are saved locally on the device.';
-    const knowledgeAnswer = findKnowledgeAnswer(question);
-    if (knowledgeAnswer) return knowledgeAnswer;
-    return `Thanks, ${currentUserName}. I received your message. Try asking about EDVO.X's mission, services, pricing, careers, or how to get in touch.`;
-  };
+  let chatHistory = [];
 
   const startChat = (name, emailValue) => {
     currentUserName = getDisplayName(name, emailValue);
     chatMessages.replaceChildren();
+    chatHistory = [];
     appendChatMessage('assistant', `Hi ${currentUserName}, what can I do for you today?`);
     chatInput.value = '';
   };
@@ -245,13 +194,11 @@ document.addEventListener('DOMContentLoaded', () => {
     lockScreen.classList.add('hidden');
     chatScreen.classList.remove('hidden');
     startChat(session.name, session.email);
-    if (session.role === 'admin') {
-      renderEmployees();
-      renderDocuments();
-      adminSidebar.classList.remove('hidden');
-      sidebarToggle.classList.remove('hidden');
-      showAdminView('chatView');
-    }
+    adminSidebar.classList.remove('hidden');
+    sidebarToggle.classList.remove('hidden');
+    uploadsLink.classList.toggle('hidden', session.role !== 'admin');
+    if (session.role === 'admin') renderDocuments();
+    showAdminView('chatView');
   };
 
   const showError = (message, field) => {
@@ -337,7 +284,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
   sidebarLinks.forEach((link) => link.addEventListener('click', () => {
     showAdminView(link.dataset.view);
-    if (link.dataset.view === 'employeeListView') renderEmployees();
+    adminSidebar.classList.remove('is-open');
+    sidebarToggle.setAttribute('aria-expanded', 'false');
   }));
 
   logoutButton.addEventListener('click', () => {
@@ -360,7 +308,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }, 650);
   });
 
-  chatForm.addEventListener('submit', (event) => {
+  chatForm.addEventListener('submit', async (event) => {
     event.preventDefault();
     const message = chatInput.value.trim();
     if (!message) return;
@@ -369,56 +317,60 @@ document.addEventListener('DOMContentLoaded', () => {
     chatInput.disabled = true;
     chatSendButton.disabled = true;
     const typing = showTypingIndicator();
-    window.setTimeout(() => {
+    const finishTurn = (replyText) => {
       typing.remove();
-      typeBotReply(getFakeReply(message), () => {
+      typeBotReply(replyText, () => {
         chatInput.disabled = false;
         chatSendButton.disabled = false;
         chatInput.focus();
       });
-    }, 600);
-  });
-
-  employeeForm.addEventListener('submit', async (event) => {
-    event.preventDefault();
-    const name = employeeName.value.trim();
-    const workEmail = employeeEmail.value.trim().toLowerCase();
-    if (!name || !employeeEmail.validity.valid || employeePassword.value.length < 6) {
-      adminError.textContent = 'Enter a name, valid work email, and 6+ character password.';
-      adminError.classList.remove('hidden');
-      return;
-    }
+    };
     try {
-      const response = await fetch(`${apiBase}/employees`, {
+      const response = await fetch(`${apiBase}/chat`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${currentSession.token}` },
-        body: JSON.stringify({ name, email: workEmail, password: employeePassword.value }),
+        body: JSON.stringify({ message, history: chatHistory }),
       });
       const data = await response.json().catch(() => ({}));
       if (!response.ok) {
-        adminError.textContent = data.error || 'Could not create the employee account.';
-        adminError.classList.remove('hidden');
+        finishTurn(data.error || 'Something went wrong reaching the assistant. Please try again.');
         return;
       }
-      employeeForm.reset();
-      adminError.classList.add('hidden');
-      renderEmployees();
+      chatHistory.push({ role: 'user', content: message }, { role: 'assistant', content: data.reply });
+      finishTurn(data.reply);
     } catch {
-      adminError.textContent = 'Could not reach the server. Check your connection and try again.';
-      adminError.classList.remove('hidden');
+      finishTurn('Could not reach the assistant. Check your connection and try again.');
     }
   });
 
-  uploadForm.addEventListener('submit', (event) => {
+  uploadForm.addEventListener('submit', async (event) => {
     event.preventDefault();
     const file = documentFile.files[0];
     if (!file) return;
-    const documents = getDocuments();
-    documents.push({ name: file.name, size: Math.max(1, Math.round(file.size / 1024)) });
-    saveDocuments(documents);
-    uploadForm.reset();
-    uploadStatus.textContent = `${file.name} is saved in the app queue. Connect the secure Google Drive backend to sync it to cloud storage.`;
+    const uploadButton = uploadForm.querySelector('button[type="submit"]');
+    uploadButton.disabled = true;
+    uploadStatus.textContent = `Uploading ${file.name}…`;
     uploadStatus.classList.remove('hidden');
-    renderDocuments();
+    try {
+      const formData = new FormData();
+      formData.append('file', file);
+      const response = await fetch(`${apiBase}/documents`, {
+        method: 'POST',
+        headers: { Authorization: `Bearer ${currentSession.token}` },
+        body: formData,
+      });
+      const data = await response.json().catch(() => ({}));
+      if (!response.ok) {
+        uploadStatus.textContent = data.error || 'Could not upload the document. Please try again.';
+        return;
+      }
+      uploadForm.reset();
+      uploadStatus.textContent = `${file.name} was added to EDVO Bot's knowledge base.`;
+      renderDocuments();
+    } catch {
+      uploadStatus.textContent = 'Could not reach the server. Check your connection and try again.';
+    } finally {
+      uploadButton.disabled = false;
+    }
   });
 });
