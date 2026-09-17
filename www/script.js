@@ -91,7 +91,7 @@ document.addEventListener('DOMContentLoaded', () => {
       if (!response.ok) throw new Error('Failed to load documents');
       const documents = await response.json();
       documentList.innerHTML = documents.length
-        ? documents.map((document) => `<div class="document-row"><span class="document-name" title="${escapeHtml(document.name)}">${escapeHtml(document.name)}</span><div class="document-meta"><small>${document.size_kb} KB · Added to EDVO Bot's knowledge</small><button class="doc-delete-btn" type="button" data-id="${document.id}" data-name="${escapeHtml(document.name)}" aria-label="Delete ${escapeHtml(document.name)}">✕</button></div></div>`).join('')
+        ? documents.map((document) => `<div class="document-row"><span class="document-name" title="${escapeHtml(document.name)}">${escapeHtml(document.name)}</span><div class="document-meta"><small>${document.size_kb} KB · Added to EDVO Bot's knowledge</small><button class="doc-delete-btn" type="button" data-id="${document.id}" data-name="${escapeHtml(document.name)}" aria-label="Delete ${escapeHtml(document.name)}"><svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/><path d="M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/></svg></button></div></div>`).join('')
         : '<p class="empty-state">No documents uploaded yet.</p>';
     } catch {
       documentList.innerHTML = '<p class="empty-state">Could not load documents. Check your connection and try again.</p>';

@@ -279,13 +279,16 @@ input {
 .document-meta small { color: var(--muted); min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .doc-delete-btn {
   flex-shrink: 0;
-  width: 26px;
-  height: 26px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  padding: 0;
   border: 0;
   border-radius: 50%;
   background: rgba(229, 72, 77, 0.12);
   color: #ff8a8d;
-  font-size: 0.85rem;
   line-height: 1;
   cursor: pointer;
 }
