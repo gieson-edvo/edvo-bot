@@ -272,11 +272,11 @@ input {
 .drop-zone input { margin-top: 8px; max-width: 100%; }
 .upload-form button { justify-self: start; border: 0; border-radius: 10px; padding: 12px 16px; background: var(--green); color: #05110d; font-weight: 800; cursor: pointer; }
 .upload-status { color: var(--green); }
-.document-list { display: grid; gap: 8px; margin-top: 14px; }
-.document-row { display: flex; flex-direction: column; gap: 6px; padding: 12px; border-radius: 10px; background: rgba(255,255,255,.05); }
-.document-name { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-weight: 600; }
-.document-meta { display: flex; align-items: center; justify-content: space-between; gap: 14px; }
-.document-meta small { color: var(--muted); min-width: 0; }
+.document-list { display: grid; gap: 8px; margin-top: 14px; min-width: 0; }
+.document-row { display: flex; flex-direction: column; gap: 6px; padding: 12px; border-radius: 10px; background: rgba(255,255,255,.05); min-width: 0; }
+.document-name { display: block; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-weight: 600; min-width: 0; }
+.document-meta { display: flex; align-items: center; justify-content: space-between; gap: 14px; min-width: 0; }
+.document-meta small { color: var(--muted); min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .doc-delete-btn {
   flex-shrink: 0;
   width: 26px;
