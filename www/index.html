@@ -59,7 +59,6 @@
         </div>
         <div class="header-actions">
           <button class="sidebar-toggle hidden" id="sidebarToggle" type="button" aria-label="Open admin menu" aria-expanded="false">☰</button>
-          <button class="speaker-btn" aria-label="Audio">◌</button>
         </div>
       </header>
 
@@ -115,8 +114,7 @@
 
         <footer class="chat-input-bar">
         <form class="chat-input-wrap" id="chatForm">
-          <input id="chatInput" type="text" placeholder="Ask a question..." aria-label="Ask a question" autocomplete="off" />
-          <button class="mic-btn" type="button" aria-label="Voice input">◍</button>
+          <textarea id="chatInput" rows="1" placeholder="Ask a question..." aria-label="Ask a question" autocomplete="off"></textarea>
           <button class="send-btn" type="submit" aria-label="Send">→</button>
         </form>
         </footer>
@@ -137,6 +135,18 @@
         <div class="update-actions">
           <button class="update-later" id="updateLater" type="button">Later</button>
           <a class="update-now" id="updateNow" href="#" target="_blank" rel="noopener">Update now</a>
+        </div>
+      </div>
+    </section>
+
+    <section class="update-dialog hidden" id="deleteDocDialog" role="dialog" aria-modal="true" aria-labelledby="deleteDocTitle">
+      <div class="update-card">
+        <span class="update-kicker">REMOVE DOCUMENT</span>
+        <h2 id="deleteDocTitle">Delete this document?</h2>
+        <p id="deleteDocMessage">This will remove it from EDVO Bot's knowledge and from the Google Drive folder.</p>
+        <div class="update-actions">
+          <button class="update-later" id="deleteDocCancel" type="button">Cancel</button>
+          <button class="delete-now" id="deleteDocConfirm" type="button">Delete</button>
         </div>
       </div>
     </section>

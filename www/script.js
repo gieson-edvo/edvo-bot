@@ -26,6 +26,10 @@ document.addEventListener('DOMContentLoaded', () => {
   const updateMessage = document.getElementById('updateMessage');
   const updateNow = document.getElementById('updateNow');
   const updateLater = document.getElementById('updateLater');
+  const deleteDocDialog = document.getElementById('deleteDocDialog');
+  const deleteDocMessage = document.getElementById('deleteDocMessage');
+  const deleteDocCancel = document.getElementById('deleteDocCancel');
+  const deleteDocConfirm = document.getElementById('deleteDocConfirm');
   const appVersion = window.EDVO_APP_VERSION || '1.1.0';
   const appVersionLabel = document.getElementById('appVersion');
   appVersionLabel.textContent = `Version ${appVersion}`;
@@ -87,7 +91,7 @@ document.addEventListener('DOMContentLoaded', () => {
       if (!response.ok) throw new Error('Failed to load documents');
       const documents = await response.json();
       documentList.innerHTML = documents.length
-        ? documents.map((document) => `<div class="document-row"><span>${escapeHtml(document.name)}</span><small>${document.size_kb} KB · Added to EDVO Bot's knowledge</small></div>`).join('')
+        ? documents.map((document) => `<div class="document-row"><span class="document-name" title="${escapeHtml(document.name)}">${escapeHtml(document.name)}</span><div class="document-meta"><small>${document.size_kb} KB · Added to EDVO Bot's knowledge</small><button class="doc-delete-btn" type="button" data-id="${document.id}" data-name="${escapeHtml(document.name)}" aria-label="Delete ${escapeHtml(document.name)}">✕</button></div></div>`).join('')
         : '<p class="empty-state">No documents uploaded yet.</p>';
     } catch {
       documentList.innerHTML = '<p class="empty-state">Could not load documents. Check your connection and try again.</p>';
@@ -308,12 +312,26 @@ document.addEventListener('DOMContentLoaded', () => {
     }, 650);
   });
 
+  const resizeChatInput = () => {
+    chatInput.style.height = 'auto';
+    chatInput.style.height = `${chatInput.scrollHeight}px`;
+  };
+  chatInput.addEventListener('input', resizeChatInput);
+
+  chatInput.addEventListener('keydown', (event) => {
+    if (event.key === 'Enter' && !event.shiftKey) {
+      event.preventDefault();
+      chatForm.requestSubmit();
+    }
+  });
+
   chatForm.addEventListener('submit', async (event) => {
     event.preventDefault();
     const message = chatInput.value.trim();
     if (!message) return;
     appendChatMessage('user', message);
     chatInput.value = '';
+    resizeChatInput();
     chatInput.disabled = true;
     chatSendButton.disabled = true;
     const typing = showTypingIndicator();
@@ -371,6 +389,37 @@ document.addEventListener('DOMContentLoaded', () => {
       uploadStatus.textContent = 'Could not reach the server. Check your connection and try again.';
     } finally {
       uploadButton.disabled = false;
+    }
+  });
+
+  let pendingDeleteId = null;
+
+  documentList.addEventListener('click', (event) => {
+    const button = event.target.closest('.doc-delete-btn');
+    if (!button) return;
+    pendingDeleteId = button.dataset.id;
+    deleteDocMessage.textContent = `Delete "${button.dataset.name}"? This will remove it from EDVO Bot's knowledge and from the Google Drive folder.`;
+    deleteDocDialog.classList.remove('hidden');
+  });
+
+  deleteDocCancel.addEventListener('click', () => {
+    pendingDeleteId = null;
+    deleteDocDialog.classList.add('hidden');
+  });
+
+  deleteDocConfirm.addEventListener('click', async () => {
+    if (!pendingDeleteId) return;
+    deleteDocConfirm.disabled = true;
+    try {
+      const response = await fetch(`${apiBase}/documents/${pendingDeleteId}`, {
+        method: 'DELETE',
+        headers: { Authorization: `Bearer ${currentSession.token}` },
+      });
+      if (response.ok) renderDocuments();
+    } finally {
+      deleteDocConfirm.disabled = false;
+      pendingDeleteId = null;
+      deleteDocDialog.classList.add('hidden');
     }
   });
 });
