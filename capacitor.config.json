@@ -1,5 +1,12 @@
 {
   "appId": "com.edvo.bot",
   "appName": "EDVO Bot",
-  "webDir": "www"
+  "webDir": "www",
+  "plugins": {
+    "CapacitorUpdater": {
+      "autoUpdate": false,
+      "statsUrl": "",
+      "resetWhenUpdate": true
+    }
+  }
 }

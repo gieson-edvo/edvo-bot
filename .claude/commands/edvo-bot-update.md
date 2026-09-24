@@ -29,3 +29,9 @@ Steps:
    commit the fix, and ship again under the next patch version (do not reuse the failed tag).
 7. On success, confirm with `gh release view vX.Y.Z --repo gieson-edvo/edvo-bot` and report the release
    URL and asset to the user.
+
+Live updates: each release also publishes `edvo-bot-web-min-native-<N>.zip` (the `www/` bundle), which
+installed apps at native version ≥ N apply in place without reinstalling the APK. `N` comes from
+`native-version.txt`. Before tagging, if this release changes anything native (Capacitor plugins,
+`android/`, `capacitor.config.json`), set `native-version.txt` to the version being shipped so older
+APKs fall back to the "Update now" APK prompt instead of loading a bundle they can't run.

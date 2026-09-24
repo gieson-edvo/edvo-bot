@@ -52,6 +52,33 @@ document.addEventListener('DOMContentLoaded', () => {
 
   const signInButton = loginForm.querySelector('.unlock-btn');
 
+  // Live updates: web-only releases are applied in place (no APK reinstall) when the
+  // installed native shell is new enough. Without this call the plugin rolls back the bundle.
+  const liveUpdater = window.Capacitor?.Plugins?.CapacitorUpdater;
+  liveUpdater?.notifyAppReady().catch(() => {});
+
+  // CI publishes the web bundle as edvo-bot-web-min-native-<version>.zip, where <version>
+  // (from native-version.txt) is the oldest APK that can run it.
+  const applyLiveUpdate = async (release) => {
+    if (!liveUpdater) return false;
+    const bundleAsset = (release.assets || []).find((asset) => /^edvo-bot-web-min-native-.+\.zip$/.test(asset.name));
+    // The plugin refuses bundles without a SHA-256; GitHub reports it as "sha256:<hex>".
+    const checksum = (bundleAsset?.digest || '').replace(/^sha256:/, '');
+    if (!bundleAsset || !checksum) return false;
+    const minNative = bundleAsset.name.match(/^edvo-bot-web-min-native-(.+)\.zip$/)[1];
+    try {
+      const { native } = await liveUpdater.current();
+      if (compareVersions(native, minNative) < 0) return false;
+      showLoading('Updating EDVO Bot…');
+      const bundle = await liveUpdater.download({ url: bundleAsset.browser_download_url, version: release.tag_name.replace(/^v/i, ''), checksum });
+      await liveUpdater.set({ id: bundle.id });
+      return true;
+    } catch {
+      hideLoading();
+      return false;
+    }
+  };
+
   const checkForAppUpdate = async () => {
     signInButton.disabled = true;
     signInButton.textContent = 'Checking for updates…';
@@ -63,6 +90,7 @@ document.addEventListener('DOMContentLoaded', () => {
       if (!response.ok) return;
       const release = await response.json();
       if (compareVersions(release.tag_name || '', appVersion) <= 0) return;
+      if (await applyLiveUpdate(release)) return;
       const apk = (release.assets || []).find((asset) => asset.name === 'edvo-bot.apk');
       if (!apk || !apk.browser_download_url) return;
       updateMessage.textContent = `Version ${release.tag_name.replace(/^v/i, '')} is available. Update to get the latest improvements.`;
