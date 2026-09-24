@@ -186,11 +186,71 @@ document.addEventListener('DOMContentLoaded', () => {
 
   let chatHistory = [];
 
+  const quickActions = [
+    {
+      title: 'About EDVO.X',
+      description: "Learn about our company, mission, and what we're building.",
+      prompt: 'Tell me about EDVO.X — what you do, your mission, and your vision.',
+      icon: '<path d="M6 22V4a1 1 0 0 1 1-1h10a1 1 0 0 1 1 1v18"/><path d="M3 22h18"/><path d="M10 7h1M13 7h1M10 11h1M13 11h1M10 15h1M13 15h1"/><path d="M10 22v-3h4v3"/>',
+    },
+    {
+      title: 'Our Divisions',
+      description: 'Explore EDVO.X OPS, AI, DEV, and IT, and the brands under each.',
+      prompt: 'What are the divisions of EDVO.X, and what does each one do?',
+      icon: '<rect x="9" y="2" width="6" height="5" rx="1"/><rect x="2" y="17" width="6" height="5" rx="1"/><rect x="9" y="17" width="6" height="5" rx="1"/><rect x="16" y="17" width="6" height="5" rx="1"/><path d="M12 7v5M5 17v-5h14v5M12 12v5"/>',
+    },
+    {
+      title: 'Our Services',
+      description: 'Website and mobile app development, AI automation, and BPO customer operations.',
+      prompt: 'What services does EDVO.X offer, and how much does each one start at?',
+      icon: '<circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 1 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 1 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 1 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 1 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1Z"/>',
+    },
+    {
+      title: 'Our Work',
+      description: 'See the results we have delivered for our clients.',
+      prompt: 'What results has EDVO.X delivered for its clients?',
+      icon: '<path d="M3 3v18h18"/><path d="m7 15 4-4 3 3 6-6"/><path d="M16 8h4v4"/>',
+    },
+    {
+      title: 'Careers',
+      description: 'See opportunities and how to join EDVO.X.',
+      prompt: 'What career opportunities are open at EDVO.X, and how can I apply?',
+      icon: '<rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 7V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v2"/><path d="M2 13h20"/>',
+    },
+    {
+      title: 'Company Documents',
+      description: 'Access important company documents.',
+      prompt: 'Summarize the key company policies and documents I should know about.',
+      icon: '<path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8Z"/><path d="M14 2v6h6"/><path d="M8 13h8M8 17h8M8 9h2"/>',
+    },
+    {
+      title: 'Contact Us',
+      description: 'Get the right contact information for your inquiry.',
+      prompt: 'How can I contact EDVO.X, and how soon will I get a response?',
+      icon: '<path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2Z"/><path d="M8 10h.01M12 10h.01M16 10h.01"/>',
+    },
+  ];
+
+  const appendQuickActions = () => {
+    const grid = document.createElement('div');
+    grid.className = 'quick-actions';
+    grid.innerHTML = quickActions.map((action, index) => `<button class="quick-action" type="button" data-index="${index}"><span class="quick-action-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${action.icon}</svg></span><span class="quick-action-copy"><strong>${action.title}</strong><small>${action.description}</small></span><span class="quick-action-arrow" aria-hidden="true">›</span></button>`).join('');
+    chatMessages.appendChild(grid);
+  };
+
+  chatMessages.addEventListener('click', (event) => {
+    const card = event.target.closest('.quick-action');
+    if (!card || chatInput.disabled) return;
+    chatInput.value = quickActions[card.dataset.index].prompt;
+    chatForm.requestSubmit();
+  });
+
   const startChat = (name, emailValue) => {
     currentUserName = getDisplayName(name, emailValue);
     chatMessages.replaceChildren();
     chatHistory = [];
     appendChatMessage('assistant', `Hi ${currentUserName}, what can I do for you today?`);
+    appendQuickActions();
     chatInput.value = '';
   };
 
